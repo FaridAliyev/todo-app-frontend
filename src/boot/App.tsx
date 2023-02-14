@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-// import Routes from 'routes';
+import Routes from 'routes';
 import smoothscroll from 'smoothscroll-polyfill';
 import './App.css';
 
@@ -8,8 +8,7 @@ const App: React.FC = () => {
         smoothscroll.polyfill();
     }, []);
 
-    // return <Routes />;
-    return <div>App</div>;
+    return <Routes />;
 };
 
 export default App;
