@@ -4,13 +4,14 @@ import userIcon from 'assets/img/user-icon-with-background.svg';
 import archiveIcon from 'assets/img/archive-icon.svg';
 import favoriteIcon from 'assets/img/favourite-icon.svg';
 import logoutIcon from 'assets/img/log-out-icon.svg';
+import { Link } from 'react-router-dom';
 
 export const Header: React.FC = () => {
     return (
         <header className="main-header">
-            <a href="./tasks-dashboard.html" className="main-header-logo">
+            <Link to="/tasks/dashboard" className="main-header-logo">
                 <img src={logo} alt="IBA Tech Academy" />
-            </a>
+            </Link>
             <div className="main-header-wrapper">
                 <label className="main-header-search-wrapper">
                     <input type="search" className="main-header-search" placeholder="Search" />
@@ -25,20 +26,20 @@ export const Header: React.FC = () => {
                     <div className="hidden-accordion-wrapper">
                         <ul className="hidden-accordion">
                             <li className="hidden-accordion-item">
-                                <a href="./tasks-archive.html" className="hidden-accordion-item-link">
+                                <Link to="/tasks/archived" className="hidden-accordion-item-link">
                                     <img className="hidden-accordion-item-image" src={archiveIcon} alt="User Icon" />
                                     Archive
-                                </a>
+                                </Link>
                             </li>
                             <li className="hidden-accordion-item">
-                                <a href="./tasks-dashboard.html" className="hidden-accordion-item-link">
+                                <Link to="/tasks/dashboard" className="hidden-accordion-item-link">
                                     <img
                                         className="hidden-accordion-item-image"
                                         src={favoriteIcon}
                                         alt="Favourite Icon"
                                     />
                                     My tasks
-                                </a>
+                                </Link>
                             </li>
                             <li className="hidden-accordion-item">
                                 <a href="./login.html" className="hidden-accordion-item-link">

@@ -338,6 +338,7 @@ table {
 }
 .task-icons-item {
     margin: 0 15px;
+    cursor: pointer;
 }
 .task-btn {
     padding: 8px 28px;
