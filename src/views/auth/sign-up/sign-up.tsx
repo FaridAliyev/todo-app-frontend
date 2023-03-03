@@ -4,8 +4,39 @@ import startPagePromo from 'assets/img/start-page-promo.png';
 import userIcon from 'assets/img/icons/user.png';
 import emailIcon from 'assets/img/icons/email.png';
 import passwordIcon from 'assets/img/icons/password.png';
+import { useState } from 'react';
+import { axiosInstance } from 'api';
+
+interface NewUser {
+    email: string;
+    fullName: string;
+    password: string;
+    confirmPassword: string;
+}
 
 export const SignUp: React.FC = () => {
+    const [newUser, setNewUser] = useState<NewUser>({
+        email: '',
+        fullName: '',
+        password: '',
+        confirmPassword: '',
+    });
+
+    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        axiosInstance
+            .post('/register', newUser)
+            .then((response) => console.log(response))
+            .catch((error) => console.log(error));
+    };
+
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setNewUser({
+            ...newUser,
+            [event.target.name]: event.target.value,
+        });
+    };
+
     return (
         <>
             <div className="navbar-light">
@@ -38,14 +69,20 @@ export const SignUp: React.FC = () => {
                                 </Link>
                             </p>
 
-                            <form action="#" className="sign-up-form" id="sign-up-form">
+                            <form onSubmit={handleSubmit} className="sign-up-form" id="sign-up-form">
                                 <div className="text-input-container @@complete">
                                     <span className="text-input-icon">
                                         <span>
                                             <img src={userIcon} alt="" />
                                         </span>
                                     </span>
-                                    <input type="text" className="form-control @@complete" placeholder="Full name" />
+                                    <input
+                                        type="text"
+                                        name="fullName"
+                                        className="form-control @@complete"
+                                        placeholder="Full name"
+                                        onChange={handleChange}
+                                    />
                                 </div>
                                 <div className="text-input-container @@complete">
                                     <span className="text-input-icon">
@@ -55,17 +92,11 @@ export const SignUp: React.FC = () => {
                                     </span>
                                     <input
                                         type="email"
+                                        name="email"
                                         className="form-control @@complete"
                                         placeholder="Email address"
+                                        onChange={handleChange}
                                     />
-                                </div>
-                                <div className="text-input-container @@complete">
-                                    <span className="text-input-icon">
-                                        <span>
-                                            <img src={passwordIcon} alt="" />
-                                        </span>
-                                    </span>
-                                    <input type="password" className="form-control @@complete" placeholder="Password" />
                                 </div>
                                 <div className="text-input-container @@complete">
                                     <span className="text-input-icon">
@@ -75,8 +106,24 @@ export const SignUp: React.FC = () => {
                                     </span>
                                     <input
                                         type="password"
+                                        name="password"
+                                        className="form-control @@complete"
+                                        placeholder="Password (min 1 uppercase, 1 symbol)"
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                                <div className="text-input-container @@complete">
+                                    <span className="text-input-icon">
+                                        <span>
+                                            <img src={passwordIcon} alt="" />
+                                        </span>
+                                    </span>
+                                    <input
+                                        type="password"
+                                        name="confirmPassword"
                                         className="form-control @@complete"
                                         placeholder="Confirm password"
+                                        onChange={handleChange}
                                     />
                                 </div>
 

@@ -1,3 +1,4 @@
+import { NotificationsProvider } from 'context/NotificationsContext';
 import { useEffect } from 'react';
 import Routes from 'routes';
 import smoothscroll from 'smoothscroll-polyfill';
@@ -8,7 +9,11 @@ const App: React.FC = () => {
         smoothscroll.polyfill();
     }, []);
 
-    return <Routes />;
+    return (
+        <NotificationsProvider>
+            <Routes />
+        </NotificationsProvider>
+    );
 };
 
 export default App;

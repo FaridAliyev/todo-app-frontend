@@ -1,8 +1,35 @@
 import { Link } from 'react-router-dom';
 import logoDark from 'assets/img/logo-dark.png';
 import startPagePromo from 'assets/img/start-page-promo.png';
+import { useState } from 'react';
+import { axiosInstance } from 'api';
+
+interface User {
+    username: string;
+    password: string;
+}
 
 export const SignIn: React.FC = () => {
+    const [user, setUser] = useState<User>({
+        username: '',
+        password: '',
+    });
+
+    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        axiosInstance
+            .post('/login', user)
+            .then((response) => console.log(response))
+            .catch((error) => console.log(error));
+    };
+
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setUser({
+            ...user,
+            [event.target.name]: event.target.value,
+        });
+    };
+
     return (
         <>
             <div className="navbar-light">
@@ -33,7 +60,7 @@ export const SignIn: React.FC = () => {
                                 password
                             </p>
 
-                            <form action="#" className="login-form" id="login-form">
+                            <form onSubmit={handleSubmit} className="login-form" id="login-form">
                                 <div className="text-input-container @@complete">
                                     <span className="text-input-icon">
                                         <span>
@@ -44,6 +71,8 @@ export const SignIn: React.FC = () => {
                                         type="email"
                                         className="form-control @@complete"
                                         placeholder="Email address"
+                                        name="username"
+                                        onChange={handleChange}
                                     />
                                 </div>
                                 <div className="text-input-container @@complete">
@@ -52,7 +81,13 @@ export const SignIn: React.FC = () => {
                                             <img src="./img/icons/password.png" alt="" />
                                         </span>
                                     </span>
-                                    <input type="password" className="form-control @@complete" placeholder="Password" />
+                                    <input
+                                        type="password"
+                                        className="form-control @@complete"
+                                        placeholder="Password"
+                                        name="password"
+                                        onChange={handleChange}
+                                    />
                                 </div>
 
                                 <div className="login-options">
@@ -62,9 +97,9 @@ export const SignIn: React.FC = () => {
                                 </div>
 
                                 <div className="button-container">
-                                    <a href="landing.html" className="btn btn-dark">
+                                    <button type="submit" className="btn btn-dark">
                                         Login now
-                                    </a>
+                                    </button>
 
                                     <Link to="/sign-up" className="btn btn-light">
                                         Create account
