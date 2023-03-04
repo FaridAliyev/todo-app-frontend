@@ -6,6 +6,7 @@ import emailIcon from 'assets/img/icons/email.png';
 import passwordIcon from 'assets/img/icons/password.png';
 import { useState } from 'react';
 import { axiosInstance } from 'api';
+import { useNotifications } from 'context/NotificationsContext';
 
 interface NewUser {
     email: string;
@@ -15,6 +16,8 @@ interface NewUser {
 }
 
 export const SignUp: React.FC = () => {
+    const { notify } = useNotifications();
+
     const [newUser, setNewUser] = useState<NewUser>({
         email: '',
         fullName: '',
@@ -26,8 +29,18 @@ export const SignUp: React.FC = () => {
         event.preventDefault();
         axiosInstance
             .post('/register', newUser)
-            .then((response) => console.log(response))
-            .catch((error) => console.log(error));
+            .then(() =>
+                notify({
+                    type: 'success',
+                    message: 'Please check your email and confirm your account',
+                }),
+            )
+            .catch((error) =>
+                notify({
+                    type: 'error',
+                    message: error.response.data.message || 'Something went wrong',
+                }),
+            );
     };
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {

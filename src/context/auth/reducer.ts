@@ -11,17 +11,6 @@ export const ACCESS_TOKEN_KEY = '@auth/accessToken';
 export type AuthUserProps =
     | {
           email: string;
-          roles: string[];
-          //   permissions: Permission[];
-          firstName: string;
-          lastName: string;
-          fullName: string;
-          shortName: string;
-          id: string;
-          userCode: string;
-          avatar: { url: string } | null;
-          phoneNumber: number;
-          code: string;
       }
     | undefined;
 
@@ -74,21 +63,8 @@ const authLoaded = (draft: Draft<AuthState>) => {
 
 const loggedIn = (draft: Draft<AuthState>, accessToken) => {
     const user = jwtDecode(accessToken);
-    const shortName = user && user?.firstName.split('')[0].toUpperCase() + user?.lastName.split('')[0].toUpperCase();
-    const fullName = user?.firstName + user?.lastName;
     const normalizedUser: AuthUserProps = {
-        firstName: user.firstName,
-        lastName: user.lastName,
-        fullName,
-        shortName,
-        email: user.email,
-        roles: user.roles,
-        // permissions: user.permissions,
-        id: user.id,
-        avatar: user.avatar,
-        userCode: user.customer?.code,
-        phoneNumber: user?.phoneNumber,
-        code: user?.code,
+        email: user.sub,
     };
     draft.user = normalizedUser;
     draft.isLoggedIn = true;
@@ -98,12 +74,6 @@ const loggedIn = (draft: Draft<AuthState>, accessToken) => {
 
 const logIn = (draft: Draft<AuthState>, action: LoggedInAction) => {
     loggedIn(draft, action.accessToken);
-};
-
-const socialLogin = (draft: Draft<AuthState>, action: SocialLoggedInAction) => {
-    localStorage.setItem(ACCESS_TOKEN_KEY, action.accessToken);
-    draft.authDialogOpen = true;
-    draft.selectedTab = 2;
 };
 
 const logOut = (draft: Draft<AuthState>) => {
@@ -128,18 +98,6 @@ const closeModal = (draft: Draft<AuthState>) => {
 const selectTab = (draft: Draft<AuthState>, action: SelectTabAction) => {
     draft.selectedTab = action.tab;
 };
-const changeUserName = (draft: Draft<AuthState>, action: ChangeUserNameAction) => {
-    if (draft.user) {
-        const user: AuthUserProps = {
-            ...draft.user,
-            firstName: action.firstName,
-            lastName: action.lastName,
-            fullName: action?.firstName + action?.lastName,
-        };
-
-        draft.user = user;
-    }
-};
 
 export const reducer: Reducer<AuthState, AuthAction> = produce((draft: Draft<AuthState>, action: AuthAction): void => {
     switch (action.type) {
@@ -160,12 +118,6 @@ export const reducer: Reducer<AuthState, AuthAction> = produce((draft: Draft<Aut
             break;
         case 'SELECT_TAB':
             selectTab(draft, action);
-            break;
-        case 'CHANGE_USER_NAME':
-            changeUserName(draft, action);
-            break;
-        case 'SOCIAL_LOGGED_IN':
-            socialLogin(draft, action);
             break;
         default:
             break;

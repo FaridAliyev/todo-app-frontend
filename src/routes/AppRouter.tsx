@@ -1,5 +1,6 @@
 import { lazy } from 'react';
 import { Route, Routes } from 'react-router-dom';
+import PrivateRoute from './PrivateRoute';
 
 const HomePage = lazy(() => import('views/home'));
 const AppLayout = lazy(() => import('views/layout/app'));
@@ -13,7 +14,17 @@ const TasksArchivedPage = lazy(() => import('views/tasks/archived-tasks'));
 const AppRouter: React.FC = () => {
     return (
         <Routes>
-            <Route path="/" element={<AppLayout />}>
+            <Route path="/sign-in" element={<SignInPage />} />
+            <Route path="/sign-up" element={<SignUpPage />} />
+            <Route path="/reset-password" element={<ForgotPasswordPage />} />
+            <Route
+                path="/"
+                element={
+                    <PrivateRoute>
+                        <AppLayout />
+                    </PrivateRoute>
+                }
+            >
                 <Route index element={<HomePage />} />
                 <Route path="/tasks/dashboard" element={<TasksDashboardPage />} />
                 <Route path="/tasks/create" element={<TasksCreatePage />} />
@@ -21,9 +32,6 @@ const AppRouter: React.FC = () => {
 
                 {/* <Route path="*" element={<NoPage />} /> */}
             </Route>
-            <Route path="/sign-in" element={<SignInPage />} />
-            <Route path="/sign-up" element={<SignUpPage />} />
-            <Route path="/reset-password" element={<ForgotPasswordPage />} />
         </Routes>
     );
 };

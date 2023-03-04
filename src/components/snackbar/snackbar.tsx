@@ -109,13 +109,13 @@ export const Snackbar: React.FC<SnackbarProps> = ({ open, autoHideDuration, onCl
     const generateTitle = (type: string): string | undefined => {
         switch (type) {
             case 'success':
-                return 'success';
+                return 'Success';
             case 'warning':
-                return 'warning';
+                return 'Warning';
             case 'error':
-                return 'error';
+                return 'Error';
             case 'info':
-                return 'info';
+                return 'Info';
         }
     };
 

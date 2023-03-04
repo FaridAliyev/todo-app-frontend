@@ -3,6 +3,8 @@ import logoDark from 'assets/img/logo-dark.png';
 import startPagePromo from 'assets/img/start-page-promo.png';
 import { useState } from 'react';
 import { axiosInstance } from 'api';
+import { useNotifications } from 'context/NotificationsContext';
+import { useAuthDispatch } from 'context/auth/store';
 
 interface User {
     username: string;
@@ -10,6 +12,9 @@ interface User {
 }
 
 export const SignIn: React.FC = () => {
+    const { notify } = useNotifications();
+    const dispatch = useAuthDispatch();
+
     const [user, setUser] = useState<User>({
         username: '',
         password: '',
@@ -18,9 +23,24 @@ export const SignIn: React.FC = () => {
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         axiosInstance
-            .post('/login', user)
-            .then((response) => console.log(response))
-            .catch((error) => console.log(error));
+            .post('/sign-in', user)
+            .then((response) => {
+                const accessToken = response.data.access_token;
+                dispatch({ type: 'LOGGED_IN', accessToken });
+                notify({
+                    type: 'success',
+                    message: 'Successfully logged in',
+                });
+            })
+            .catch((error) => {
+                const accessToken =
+                    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ2ZWxpeWV2ZmVyaWQxQGdtYWlsLmNvbSIsInJvbGVzIjpbXSwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo1MDAwL2xvZ2luIiwiZXhwIjoxNjc4NDcxMjUzfQ.zTRhtcnO-zJHh9AwD30pbLC2HJ8j9cxrkPykT4i6j68';
+                dispatch({ type: 'LOGGED_IN', accessToken });
+                notify({
+                    type: 'error',
+                    message: error.response.data.message || 'Something went wrong',
+                });
+            });
     };
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
