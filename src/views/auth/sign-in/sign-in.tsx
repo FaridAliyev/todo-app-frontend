@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { axiosInstance } from 'api';
 import { useNotifications } from 'context/NotificationsContext';
 import { useAuthDispatch } from 'context/auth/store';
+import { useNavigate } from 'react-router-dom';
 
 interface User {
     username: string;
@@ -14,6 +15,7 @@ interface User {
 export const SignIn: React.FC = () => {
     const { notify } = useNotifications();
     const dispatch = useAuthDispatch();
+    const navigate = useNavigate();
 
     const [user, setUser] = useState<User>({
         username: '',
@@ -31,11 +33,10 @@ export const SignIn: React.FC = () => {
                     type: 'success',
                     message: 'Successfully logged in',
                 });
+
+                setTimeout(() => navigate('/'), 1000);
             })
             .catch((error) => {
-                const accessToken =
-                    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ2ZWxpeWV2ZmVyaWQxQGdtYWlsLmNvbSIsInJvbGVzIjpbXSwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo1MDAwL2xvZ2luIiwiZXhwIjoxNjc4NDcxMjUzfQ.zTRhtcnO-zJHh9AwD30pbLC2HJ8j9cxrkPykT4i6j68';
-                dispatch({ type: 'LOGGED_IN', accessToken });
                 notify({
                     type: 'error',
                     message: error.response.data.message || 'Something went wrong',

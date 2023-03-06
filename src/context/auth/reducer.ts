@@ -56,6 +56,7 @@ const authLoaded = (draft: Draft<AuthState>) => {
     if (user) {
         draft.user = JSON.parse(user);
         draft.isLoggedIn = true;
+        draft.email = JSON.parse(user).email;
     } else {
         draft.isLoggedIn = false;
     }

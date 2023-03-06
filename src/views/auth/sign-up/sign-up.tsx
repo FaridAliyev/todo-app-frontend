@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import logoDark from 'assets/img/logo-dark.png';
 import startPagePromo from 'assets/img/start-page-promo.png';
 import userIcon from 'assets/img/icons/user.png';
@@ -17,6 +17,7 @@ interface NewUser {
 
 export const SignUp: React.FC = () => {
     const { notify } = useNotifications();
+    const navigate = useNavigate();
 
     const [newUser, setNewUser] = useState<NewUser>({
         email: '',
@@ -29,12 +30,13 @@ export const SignUp: React.FC = () => {
         event.preventDefault();
         axiosInstance
             .post('/register', newUser)
-            .then(() =>
+            .then(() => {
                 notify({
                     type: 'success',
                     message: 'Please check your email and confirm your account',
-                }),
-            )
+                });
+                navigate('/sign-in');
+            })
             .catch((error) =>
                 notify({
                     type: 'error',

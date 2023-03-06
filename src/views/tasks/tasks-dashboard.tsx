@@ -1,7 +1,49 @@
 import { Link } from 'react-router-dom';
 import trashIcon from 'assets/img/trash-bin.png';
+import { axiosInstance } from 'api';
+import { useAuth } from 'context/auth/store';
+import { useQuery } from 'react-query';
+import { Spinner } from 'components';
+import { useNotifications } from 'context/NotificationsContext';
+import { TaskStatus } from 'enum';
 
 export const TasksDashboard: React.FC = () => {
+    const [{ email }] = useAuth();
+    const { notify } = useNotifications();
+
+    const fetchTodos = async () => {
+        try {
+            const response = await axiosInstance.get(`/task/getTasks/email/${email}`);
+            return response.data;
+        } catch (error) {
+            throw new Error('Failed to fetch data');
+        }
+    };
+
+    const { data, isLoading, refetch } = useQuery('todos', fetchTodos);
+
+    const archiveTask = (id: number) => {
+        axiosInstance
+            .put(`/task/archive/id/${id}`)
+            .then(() => {
+                notify({
+                    type: 'success',
+                    message: 'Task was archived',
+                });
+                refetch();
+            })
+            .catch((error) => {
+                notify({
+                    type: 'error',
+                    message: error.response.data.message || 'Something went wrong',
+                });
+            });
+    };
+
+    if (isLoading) {
+        return <Spinner />;
+    }
+
     return (
         <section className="tasks">
             <div className="container">
@@ -34,23 +76,29 @@ export const TasksDashboard: React.FC = () => {
                 </div>
 
                 <div className="tasks-list">
-                    <div className="task">
-                        <h4 className="task-title">Task 001</h4>
-                        <p className="task-start-time">21.06.2020</p>
-                        <p className="task-deadline">
-                            Deadline to: <span className="task-deadline-date">30.06.2020</span>
-                        </p>
-                        <p className="task-description">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-                            labore et dolore magna aliqua. Ut enim
-                        </p>
-                        <div className="task-icons">
-                            <img className="task-icons-item" src={trashIcon} alt="trash icon" />
-                        </div>
-                        <a href="#" className="task-btn">
-                            Complete
-                        </a>
-                    </div>
+                    {data
+                        .filter((todo) => todo.taskStatus !== TaskStatus.ARCHIVED)
+                        .map((todo) => (
+                            <div className="task" key={todo.id}>
+                                <h4 className="task-title">{todo.taskName}</h4>
+                                <p className="task-start-time">{todo.taskCreateDate}</p>
+                                <p className="task-deadline">
+                                    Deadline to: <span className="task-deadline-date">{todo.taskDeadlineDate}</span>
+                                </p>
+                                <p className="task-description">{todo.description}</p>
+                                <div className="task-icons">
+                                    <img
+                                        className="task-icons-item"
+                                        src={trashIcon}
+                                        alt="trash icon"
+                                        onClick={() => archiveTask(todo.id)}
+                                    />
+                                </div>
+                                <a href="#" className="task-btn">
+                                    Complete
+                                </a>
+                            </div>
+                        ))}
                 </div>
 
                 <div className="task-card-section">
