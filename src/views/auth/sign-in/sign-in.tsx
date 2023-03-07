@@ -6,6 +6,8 @@ import { axiosInstance } from 'api';
 import { useNotifications } from 'context/NotificationsContext';
 import { useAuthDispatch } from 'context/auth/store';
 import { useNavigate } from 'react-router-dom';
+import emailIcon from 'assets/img/icons/email.png';
+import passwordIcon from 'assets/img/icons/password.png';
 
 interface User {
     username: string;
@@ -34,7 +36,7 @@ export const SignIn: React.FC = () => {
                     message: 'Successfully logged in',
                 });
 
-                setTimeout(() => navigate('/'), 1000);
+                setTimeout(() => navigate('/', { state: { value: user.username } }), 1000);
             })
             .catch((error) => {
                 notify({
@@ -85,7 +87,7 @@ export const SignIn: React.FC = () => {
                                 <div className="text-input-container @@complete">
                                     <span className="text-input-icon">
                                         <span>
-                                            <img src="./img/icons/email.png" alt="" />
+                                            <img src={emailIcon} alt="" />
                                         </span>
                                     </span>
                                     <input
@@ -99,7 +101,7 @@ export const SignIn: React.FC = () => {
                                 <div className="text-input-container @@complete">
                                     <span className="text-input-icon">
                                         <span>
-                                            <img src="./img/icons/password.png" alt="" />
+                                            <img src={passwordIcon} alt="" />
                                         </span>
                                     </span>
                                     <input

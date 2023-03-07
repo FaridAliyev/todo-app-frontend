@@ -5,22 +5,40 @@ import { useState } from 'react';
 import { axiosInstance } from 'api';
 import { useNotifications } from 'context/NotificationsContext';
 import emailIcon from 'assets/img/icons/email.png';
+import passwordIcon from 'assets/img/icons/password.png';
 
-export const ForgotPassword: React.FC = () => {
-    const navigate = useNavigate();
+interface ChangePassword {
+    email: string;
+    password: string;
+    confirmPassword: string;
+}
+
+export const NewPassword: React.FC = () => {
     const { notify } = useNotifications();
-    const [email, setEmail] = useState<string>('');
+    const navigate = useNavigate();
+    const [changePassword, setChangePassword] = useState<ChangePassword>({
+        email: '',
+        password: '',
+        confirmPassword: '',
+    });
+
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setChangePassword({
+            ...changePassword,
+            [event.target.name]: event.target.value,
+        });
+    };
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         axiosInstance
-            .put(`/process/reset-password?email=${email}`)
+            .put(`/reset-password`, changePassword)
             .then(() => {
                 notify({
                     type: 'success',
-                    message: 'Please check your email for further instructions',
+                    message: 'Password was resetted',
                 });
-                navigate('/new-password');
+                navigate('/sign-in');
             })
             .catch((error) => {
                 notify({
@@ -54,8 +72,10 @@ export const ForgotPassword: React.FC = () => {
                             <img src={startPagePromo} className="start-content-welcome-img" alt="#" />
                         </div>
                         <div className="start-content-welcome-text-b">
-                            <h1 className="welcome-title">Reset password</h1>
-                            <p className="welcome-text">We’ll e-mail you instruction on how to reset your password</p>
+                            <h1 className="welcome-title">Set new password</h1>
+                            <p className="welcome-text">
+                                Please enter your email again and new password to reset your password
+                            </p>
 
                             <form onSubmit={handleSubmit} className="form" id="reset-password-form">
                                 <div className="text-input-container @@complete">
@@ -66,9 +86,38 @@ export const ForgotPassword: React.FC = () => {
                                     </span>
                                     <input
                                         type="email"
+                                        name="email"
                                         className="form-control @@complete"
                                         placeholder="Email"
-                                        onChange={(e) => setEmail(e.target.value)}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                                <div className="text-input-container @@complete">
+                                    <span className="text-input-icon">
+                                        <span>
+                                            <img src={passwordIcon} alt="" />
+                                        </span>
+                                    </span>
+                                    <input
+                                        type="password"
+                                        name="password"
+                                        className="form-control @@complete"
+                                        placeholder="Password (min 1 uppercase, 1 symbol)"
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                                <div className="text-input-container @@complete">
+                                    <span className="text-input-icon">
+                                        <span>
+                                            <img src={passwordIcon} alt="" />
+                                        </span>
+                                    </span>
+                                    <input
+                                        type="password"
+                                        name="confirmPassword"
+                                        className="form-control @@complete"
+                                        placeholder="Confirm password"
+                                        onChange={handleChange}
                                     />
                                 </div>
 

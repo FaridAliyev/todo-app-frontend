@@ -4,7 +4,7 @@ import userIcon from 'assets/img/user-icon-with-background.svg';
 import archiveIcon from 'assets/img/archive-icon.svg';
 import favoriteIcon from 'assets/img/favourite-icon.svg';
 import logoutIcon from 'assets/img/log-out-icon.svg';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from 'context/auth/store';
 import { useNotifications } from 'context/NotificationsContext';
 import { useEffect, useState } from 'react';
@@ -14,17 +14,19 @@ export const Header: React.FC = () => {
     const [{ email }, dispatch] = useAuth();
     const { notify } = useNotifications();
     const [username, setUsername] = useState<string>();
+    const location = useLocation();
+    const emailFromState = location.state?.value;
 
     useEffect(() => {
         axiosInstance
-            .get(`/user/username/${email}`)
+            .get(`/user/username/${email || emailFromState}`)
             .then((response) => {
                 setUsername(response.data.fullName);
             })
             .catch((error) => {
                 console.error(error);
             });
-    }, [email]);
+    }, [email, emailFromState]);
 
     const logOut = (): void => {
         dispatch({ type: 'LOGGED_OUT' });
