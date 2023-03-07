@@ -5,13 +5,22 @@ import { useQuery } from 'react-query';
 import { Spinner } from 'components';
 import { useNotifications } from 'context/NotificationsContext';
 import UnarchiveIcon from '@mui/icons-material/Unarchive';
-import { IconButton } from '@mui/material';
+import { Box, IconButton } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-// import TaskDetails from '../task-details';
+import { TaskSortType, TaskStatus } from 'enum';
+import TaskDetails from '../task-details';
+import DoneIcon from '@mui/icons-material/Done';
+import { useState } from 'react';
 
 export const ArchivedTasks: React.FC = () => {
     const [{ email }] = useAuth();
     const { notify, confirm } = useNotifications();
+    const [selectedItemId, setSelectedItemId] = useState<number | null>(null);
+    const [selectedSort, setSelectedSort] = useState<TaskSortType | string>('');
+
+    const handleClick = (itemId: number) => {
+        setSelectedItemId((prevItemId) => (prevItemId === itemId ? null : itemId));
+    };
 
     const fetchArchivedTodos = async () => {
         try {
@@ -22,11 +31,39 @@ export const ArchivedTasks: React.FC = () => {
         }
     };
 
-    const { data, isLoading, refetch } = useQuery('archivedTodos', fetchArchivedTodos);
+    const { data, isLoading, refetch } = useQuery('archivedTodos', fetchArchivedTodos, {
+        select: (data) => {
+            if (selectedSort) {
+                switch (selectedSort) {
+                    case TaskSortType.DELETED:
+                        return data.filter((item) => item.taskStatus === TaskStatus.ARCHIVED);
+                    case TaskSortType.OVERDUE:
+                        return data.filter((item) => new Date() > new Date(item.taskDeadlineDate));
+                    case TaskSortType.TODAY:
+                        return data.filter(
+                            (item) =>
+                                new Date().getFullYear() === new Date(item.taskCreateDate).getFullYear() &&
+                                new Date().getMonth() === new Date(item.taskCreateDate).getMonth() &&
+                                new Date().getDate() === new Date(item.taskCreateDate).getDate(),
+                        );
+                    case TaskSortType.DONE:
+                        return data.filter((item) => item.taskSortType === TaskSortType.DONE);
+                    default:
+                        return data;
+                }
+            } else {
+                return data;
+            }
+        },
+    });
 
-    const deleteTask = (id: number) => {
+    const deleteTask = (id: number, e: React.MouseEvent<HTMLElement>) => {
+        e.stopPropagation();
         confirm({
             onConfirm: () => {
+                if (selectedItemId === id) {
+                    setSelectedItemId(null);
+                }
                 axiosInstance
                     .delete(`/task/delete/id/${id}`)
                     .then(() => {
@@ -48,7 +85,13 @@ export const ArchivedTasks: React.FC = () => {
         });
     };
 
-    const unarchiveTask = (id: number) => {
+    const unarchiveTask = (id: number, e: React.MouseEvent<HTMLElement>) => {
+        e.stopPropagation();
+
+        if (selectedItemId === id) {
+            setSelectedItemId(null);
+        }
+
         axiosInstance
             .put(`/task/unarchive/id/${id}`)
             .then(() => {
@@ -66,6 +109,32 @@ export const ArchivedTasks: React.FC = () => {
             });
     };
 
+    const completeTask = (todo, e: React.MouseEvent<HTMLElement>) => {
+        e.stopPropagation();
+        const newTodo = { ...todo, taskSortType: TaskSortType.DONE };
+        axiosInstance
+            .put(`/task/id/${todo.id}`, newTodo)
+            .then(() => {
+                notify({
+                    type: 'success',
+                    message: 'Task was marked as done',
+                });
+                refetch();
+            })
+            .catch((error) => {
+                notify({
+                    type: 'error',
+                    message: error.response.data.message || 'Something went wrong',
+                });
+            });
+    };
+
+    const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        const selected = event.target.value as TaskSortType;
+        setSelectedSort(selected);
+        setSelectedItemId(null);
+    };
+
     if (isLoading) {
         return <Spinner />;
     }
@@ -80,19 +149,18 @@ export const ArchivedTasks: React.FC = () => {
                             <label htmlFor="task-type" className="tasks-filter-label">
                                 Sort by
                             </label>
-                            <select className="tasks-filter-list" name="task-type" id="">
-                                <option className="tasks-filter-item" value="deleted">
-                                    Deleted
-                                </option>
-                                <option className="tasks-filter-item" value="overdue">
-                                    Overdue
-                                </option>
-                                <option className="tasks-filter-item" value="today">
-                                    Today
-                                </option>
-                                <option className="tasks-filter-item" value="done">
-                                    Done
-                                </option>
+                            <select
+                                value={selectedSort}
+                                onChange={handleSelectChange}
+                                className="tasks-filter-list"
+                                name="task-type"
+                            >
+                                <option value="">Choose...</option>
+                                {Object.values(TaskSortType).map((sort) => (
+                                    <option key={sort} value={sort} className="tasks-filter-item">
+                                        {sort}
+                                    </option>
+                                ))}
                             </select>
                         </form>
                         <Link to="/tasks/create" className="btn btn-dark btn-add-task">
@@ -100,32 +168,69 @@ export const ArchivedTasks: React.FC = () => {
                         </Link>
                     </div>
                 </div>
-
-                <div className="tasks-list">
-                    {data.map((todo) => (
-                        <div className="task" key={todo.id}>
-                            <h4 className="task-title">{todo.taskName}</h4>
-                            <p className="task-start-time">{todo.taskCreateDate}</p>
-                            <p className="task-deadline">
-                                Deadline to: <span className="task-deadline-date">{todo.taskDeadlineDate}</span>
-                            </p>
-                            <p className="task-description">{todo.description}</p>
-                            <div className="task-icons">
-                                <IconButton onClick={() => unarchiveTask(todo.id)} title="Unarchive">
-                                    <UnarchiveIcon color="success" />
-                                </IconButton>
-                                <IconButton onClick={() => deleteTask(todo.id)} title="Delete">
-                                    <DeleteIcon color="error" />
-                                </IconButton>
-                            </div>
-                            <a href="#" className="task-btn">
-                                Complete
-                            </a>
+                {data.length ? (
+                    <>
+                        <div className="tasks-list">
+                            {data.map((todo) => (
+                                <div
+                                    className="task"
+                                    key={todo.id}
+                                    onClick={() => handleClick(todo.id)}
+                                    style={
+                                        todo.taskSortType === TaskSortType.DONE ? { backgroundColor: '#c6ebc6' } : {}
+                                    }
+                                >
+                                    <Box sx={{ position: 'relative' }}>
+                                        <h4 className="task-title">{todo.taskName}</h4>
+                                        {todo.taskSortType === TaskSortType.DONE && (
+                                            <DoneIcon
+                                                color="success"
+                                                fontSize="large"
+                                                sx={{
+                                                    position: 'absolute',
+                                                    top: '50%',
+                                                    right: '-30px',
+                                                    transform: 'translateY(-50%)',
+                                                }}
+                                            />
+                                        )}
+                                    </Box>
+                                    <p className="task-start-time">{todo.taskCreateDate}</p>
+                                    <p className="task-deadline">
+                                        Deadline to: <span className="task-deadline-date">{todo.taskDeadlineDate}</span>
+                                    </p>
+                                    <p className="task-description">{todo.description}</p>
+                                    <div className="task-icons">
+                                        <IconButton onClick={(e) => unarchiveTask(todo.id, e)} title="Unarchive">
+                                            <UnarchiveIcon color="success" />
+                                        </IconButton>
+                                        <IconButton onClick={(e) => deleteTask(todo.id, e)} title="Delete">
+                                            <DeleteIcon color="error" />
+                                        </IconButton>
+                                    </div>
+                                    <a onClick={(e) => completeTask(todo, e)} className="task-btn">
+                                        Complete
+                                    </a>
+                                </div>
+                            ))}
                         </div>
-                    ))}
-                </div>
-
-                {/* <TaskDetails /> */}
+                        {selectedItemId && (
+                            <TaskDetails id={selectedItemId} setSelectedItemId={setSelectedItemId} refetch={refetch} />
+                        )}
+                    </>
+                ) : (
+                    <h1
+                        style={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            minHeight: '50vh',
+                            fontSize: '26px',
+                        }}
+                    >
+                        No data found
+                    </h1>
+                )}
             </div>
         </section>
     );

@@ -145,7 +145,16 @@ export const TasksDashboard: React.FC = () => {
                             {data
                                 .filter((todo) => todo.taskStatus !== TaskStatus.ARCHIVED)
                                 .map((todo) => (
-                                    <div className="task" key={todo.id} onClick={() => handleClick(todo.id)}>
+                                    <div
+                                        className="task"
+                                        key={todo.id}
+                                        onClick={() => handleClick(todo.id)}
+                                        style={
+                                            todo.taskSortType === TaskSortType.DONE
+                                                ? { backgroundColor: '#c6ebc6' }
+                                                : {}
+                                        }
+                                    >
                                         <Box sx={{ position: 'relative' }}>
                                             <h4 className="task-title">{todo.taskName}</h4>
                                             {todo.taskSortType === TaskSortType.DONE && (
@@ -155,7 +164,7 @@ export const TasksDashboard: React.FC = () => {
                                                     sx={{
                                                         position: 'absolute',
                                                         top: '50%',
-                                                        right: 0,
+                                                        right: '-30px',
                                                         transform: 'translateY(-50%)',
                                                     }}
                                                 />
@@ -179,7 +188,9 @@ export const TasksDashboard: React.FC = () => {
                                     </div>
                                 ))}
                         </div>
-                        {selectedItemId && <TaskDetails id={selectedItemId} />}
+                        {selectedItemId && (
+                            <TaskDetails id={selectedItemId} setSelectedItemId={setSelectedItemId} refetch={refetch} />
+                        )}
                     </>
                 ) : (
                     <h1

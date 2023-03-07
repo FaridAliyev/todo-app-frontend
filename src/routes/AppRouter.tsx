@@ -29,8 +29,6 @@ const AppRouter: React.FC = () => {
                 <Route path="/tasks/dashboard" element={<TasksDashboardPage />} />
                 <Route path="/tasks/create" element={<TasksCreatePage />} />
                 <Route path="/tasks/archived" element={<TasksArchivedPage />} />
-
-                {/* <Route path="*" element={<NoPage />} /> */}
             </Route>
         </Routes>
     );
