@@ -1,7 +1,75 @@
 import { Link } from 'react-router-dom';
-import trashIcon from 'assets/img/trash-bin.png';
+import { axiosInstance } from 'api';
+import { useAuth } from 'context/auth/store';
+import { useQuery } from 'react-query';
+import { Spinner } from 'components';
+import { useNotifications } from 'context/NotificationsContext';
+import UnarchiveIcon from '@mui/icons-material/Unarchive';
+import { IconButton } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+// import TaskDetails from '../task-details';
 
 export const ArchivedTasks: React.FC = () => {
+    const [{ email }] = useAuth();
+    const { notify, confirm } = useNotifications();
+
+    const fetchArchivedTodos = async () => {
+        try {
+            const response = await axiosInstance.get(`/task/getArchivedTasks/email/${email}`);
+            return response.data;
+        } catch (error) {
+            throw new Error('Failed to fetch data');
+        }
+    };
+
+    const { data, isLoading, refetch } = useQuery('archivedTodos', fetchArchivedTodos);
+
+    const deleteTask = (id: number) => {
+        confirm({
+            onConfirm: () => {
+                axiosInstance
+                    .delete(`/task/delete/id/${id}`)
+                    .then(() => {
+                        notify({
+                            type: 'success',
+                            message: 'Task was deleted',
+                        });
+                        refetch();
+                    })
+                    .catch((error) => {
+                        notify({
+                            type: 'error',
+                            message: error.response.data.message || 'Something went wrong',
+                        });
+                    });
+            },
+            description: 'This action cannot be undone',
+            confirmText: 'Are you sure you want delete this task?',
+        });
+    };
+
+    const unarchiveTask = (id: number) => {
+        axiosInstance
+            .put(`/task/unarchive/id/${id}`)
+            .then(() => {
+                notify({
+                    type: 'success',
+                    message: 'Task was unarchived',
+                });
+                refetch();
+            })
+            .catch((error) => {
+                notify({
+                    type: 'error',
+                    message: error.response.data.message || 'Something went wrong',
+                });
+            });
+    };
+
+    if (isLoading) {
+        return <Spinner />;
+    }
+
     return (
         <section className="tasks">
             <div className="container">
@@ -34,77 +102,30 @@ export const ArchivedTasks: React.FC = () => {
                 </div>
 
                 <div className="tasks-list">
-                    <div className="task">
-                        <h4 className="task-title">Task 001</h4>
-                        <p className="task-start-time">21.06.2020</p>
-                        <p className="task-deadline">
-                            Deadline to: <span className="task-deadline-date">30.06.2020</span>
-                        </p>
-                        <p className="task-description">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-                            labore et dolore magna aliqua. Ut enim
-                        </p>
-                        <div className="task-icons">
-                            <img className="task-icons-item" src={trashIcon} alt="trash icon" />
-                        </div>
-                        <a href="#" className="task-btn">
-                            Complete
-                        </a>
-                    </div>
-                </div>
-
-                <div className="task-card-section">
-                    <h3 className="task-card-title">Task 002</h3>
-                    <div className="task-card">
-                        <div className="task-card-left-col">
-                            <div className="task-card-img _1"></div>
-                            <div className="task-card-form">
-                                <div className="task-card-form-row">
-                                    <label htmlFor="task-card-date" className="task-card-label">
-                                        Deadline to:
-                                    </label>
-                                    <input name="task-card-date" type="date" className="task-card-input" />
-                                </div>
-                                <div className="task-card-form-row">
-                                    <label htmlFor="name-task" className="task-card-label">
-                                        Name Task
-                                    </label>
-                                    <input
-                                        name="name-task"
-                                        type="text"
-                                        placeholder="Task 002"
-                                        className="task-card-input"
-                                    />
-                                </div>
-                            </div>
-                            <div className="task-card-actions">
-                                <a href="#" className="task-card-actions-item">
-                                    <img src={trashIcon} alt="" className="task-card-actions-icon" />
-                                    Delete
-                                </a>
-                            </div>
-                        </div>
-                        <div className="task-card-right-col">
-                            <h4 className="task-card-header">Task Description</h4>
-                            <p className="task-card-text">
-                                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-                                incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-                                exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure
-                                dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-                                Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt
-                                mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
-                                do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-                                quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis
-                                aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-                                pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
-                                deserunt mollit anim id est laborum.
+                    {data.map((todo) => (
+                        <div className="task" key={todo.id}>
+                            <h4 className="task-title">{todo.taskName}</h4>
+                            <p className="task-start-time">{todo.taskCreateDate}</p>
+                            <p className="task-deadline">
+                                Deadline to: <span className="task-deadline-date">{todo.taskDeadlineDate}</span>
                             </p>
-                            <a href="#" className="btn btn-dark btn-task-card">
-                                Save
+                            <p className="task-description">{todo.description}</p>
+                            <div className="task-icons">
+                                <IconButton onClick={() => unarchiveTask(todo.id)} title="Unarchive">
+                                    <UnarchiveIcon color="success" />
+                                </IconButton>
+                                <IconButton onClick={() => deleteTask(todo.id)} title="Delete">
+                                    <DeleteIcon color="error" />
+                                </IconButton>
+                            </div>
+                            <a href="#" className="task-btn">
+                                Complete
                             </a>
                         </div>
-                    </div>
+                    ))}
                 </div>
+
+                {/* <TaskDetails /> */}
             </div>
         </section>
     );

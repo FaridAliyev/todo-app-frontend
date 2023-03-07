@@ -103,22 +103,21 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
                         <img className="icon" src={DeleteIcon} />
                     )}
                     <Typography color={type === 'success' ? 'primary' : 'error'}>
-                        {confirmText || 'confirmDialog:confirmText'}
+                        {confirmText || 'Are you sure?'}
                     </Typography>
                 </Box>
             </DialogTitle>
             <Divider />
             <DialogContent className="contentWrapper">
                 <Box className="content">
-                    <Typography className="description">{description || 'Silinəcək'}</Typography>
+                    <Typography className="description">{description || 'This action cannot be undone'}</Typography>
                     <Box className="buttons">
                         <Button
                             onClick={() => onClose(type, description)}
                             variant="outlined"
-                            autoFocus
                             className={clsx('button', 'cancel-button')}
                         >
-                            Xeyr
+                            Cancel
                         </Button>
                         <Button
                             onClick={onConfirm}
@@ -126,7 +125,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
                             color={type === 'success' ? 'primary' : 'error'}
                             className="button"
                         >
-                            Bəli
+                            Delete
                         </Button>
                     </Box>
                 </Box>

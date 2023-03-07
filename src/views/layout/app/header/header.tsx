@@ -1,5 +1,5 @@
 import logo from 'assets/img/iba-tech-logo-white.svg';
-import searchIcon from 'assets/img/search-icon.svg';
+// import searchIcon from 'assets/img/search-icon.svg';
 import userIcon from 'assets/img/user-icon-with-background.svg';
 import archiveIcon from 'assets/img/archive-icon.svg';
 import favoriteIcon from 'assets/img/favourite-icon.svg';
@@ -40,10 +40,10 @@ export const Header: React.FC = () => {
                 <img src={logo} alt="IBA Tech Academy" />
             </Link>
             <div className="main-header-wrapper">
-                <label className="main-header-search-wrapper">
+                {/* <label className="main-header-search-wrapper">
                     <input type="search" className="main-header-search" placeholder="Search" />
                     <img src={searchIcon} alt="Search Icon" />
-                </label>
+                </label> */}
                 <div className="main-header-profile-wrapper">
                     <div className="main-header-profile-credentials">
                         <span className="main-header-profile-welcome">Welcome,</span>

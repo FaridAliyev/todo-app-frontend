@@ -45,7 +45,7 @@ export const NotificationsProvider: React.FC<{ children: ReactNode }> = ({ child
     const DEFAULT_CONFIRM_STATE: ConfirmType = {
         type: 'error',
         open: false,
-        confirmText: 'confirm',
+        confirmText: 'Confirm',
         onConfirm: (): void => {},
     };
     const [snack, setSnackState] = useState(DEFAULT_SNACK_STATE);
