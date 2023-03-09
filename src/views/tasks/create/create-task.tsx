@@ -66,7 +66,7 @@ export const CreateTask: React.FC = () => {
 
                 <div className="task-card">
                     <div className="task-card-left-col">
-                        <div className="task-card-img _2"></div>
+                        <div className="task-card-img _1"></div>
                         <div className="task-card-form">
                             <div className="task-card-form-row">
                                 <label htmlFor="task-card-date" className="task-card-label">
